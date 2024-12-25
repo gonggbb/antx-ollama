@@ -68,3 +68,30 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+ <!-- 🎉 🌟 👏  🍀 -->
+
+##  🎉 环 境  
+
+node v20.17.0
+
+ollama 3.1
+[https://ollama.com/download](https://ollama.com/download)
+
+
+##  🎉  结构; 模型接入
+
+├─llm
+│  └─ollama  
+│      └─v3.1
+└─mock
+
+
+https://www.npmjs.com/package/ollama
+https://juejin.cn/post/7381478389468872741
+
+
+# setMessagesMap 
+
+messagesMap不是同步,打印会没有数据 需要useEffect 有点不合理
