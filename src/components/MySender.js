@@ -37,7 +37,7 @@ const MySender = ({ content, agent, onSubmit, setContent, headerOpen, setHeaderO
       header={senderHeader}
       onSubmit={onSubmit}
       onChange={setContent}
-        loading={agent?.isRequesting()}
+      loading={agent?.isRequesting()}
       className={styles.sender}
     />
   );

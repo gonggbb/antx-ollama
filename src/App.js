@@ -6,7 +6,6 @@ import {
   PaperClipOutlined,
   PlusOutlined,
   ShareAltOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import { Badge, Button, Space } from 'antd';
 
@@ -159,12 +158,11 @@ const Independent = () => {
 
     console.log('Submitting message:', nextContent); // Log message submission
 
-    const newKey = Date.now();
     onRequest(nextContent);
     setMessagesMap(prev => {
       const newMessages = [
         ...(prev[activeKey] || []),
-        { id: newKey, content: nextContent, role: 'local', },
+        { id: Date.now(), content: nextContent, role: 'local', },
       ];
       console.log('Updating messagesMap with new message:', newMessages); // Log message submission
       return {

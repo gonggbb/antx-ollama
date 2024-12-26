@@ -12,8 +12,9 @@ export const useChatLogic = (defaultConversationsItems) => {
   });
 
   useEffect(() => {
-    console.log('Active key changed:', activeKey);
-  }, [activeKey]);
+    console.log('activeKey changed:', activeKey);
+    console.log('content changed:', content);
+  }, [activeKey, content]);
 
   useEffect(() => {
     console.log('Messages map changed:', messagesMap);

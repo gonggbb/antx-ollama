@@ -1,24 +1,17 @@
-import { Attachments, Bubble, Conversations, Prompts, Sender, Welcome, useXAgent, useXChat } from '@ant-design/x'; 
-import React, { useEffect } from 'react';
-import {
-  CloudUploadOutlined, 
-  EllipsisOutlined,
-  PaperClipOutlined,
-  PlusOutlined,
-  ShareAltOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { Badge, Button, Space } from 'antd';
-
-import { useStyle } from "./style"
+// Independent.js
+import React from 'react';
+import { useXChat, useXAgent } from '@ant-design/x';
 import { useChatLogic } from './hooks/useChatLogic';
-import { defaultConversationsItems, senderPromptsItems, placeholderPromptsItems, roles } from "./mock"
+import { addMessageToMap } from './services/messageService';
+import ConversationMenu from './components/ConversationMenu';
+import ChatBubbleList from './components/ChatBubbleList';
+import PromptList from './components/PromptList';
+import MySender from './components/MySender';
+import { defaultConversationsItems, senderPromptsItems, roles } from './mock';
+import { useStyle } from './style';
 
 const Independent = () => {
-  // ==================== Style ====================
   const { styles } = useStyle();
-
-  // ==================== State ====================
   const {
     headerOpen,
     setHeaderOpen,
@@ -34,10 +27,11 @@ const Independent = () => {
     setMessagesMap,
   } = useChatLogic(defaultConversationsItems);
 
+  /* 它处理发送用户消息，并通过流式读取响应体逐步接收并解析返回的数据 */
   const [agent] = useXAgent({
     request: async ({ message }, { onSuccess, onError }) => {
       try {
-        console.log('Sending message:', message);
+        console.log('Sending message:', message); // Log message being sent
 
         const response = await fetch('http://localhost:11434/api/chat', {
           method: 'POST',
@@ -77,6 +71,7 @@ const Independent = () => {
                 const data = JSON.parse(line);
                 if (data.message?.content) {
                   fullMessage += data.message.content;
+                  // eslint-disable-next-line no-loop-func
                   setMessagesMap(prev => ({
                     ...prev,
                     [activeKey]: prev[activeKey].map(msg =>
@@ -92,20 +87,27 @@ const Independent = () => {
           if (done) {
             console.log('data.done>>>>>onSuccess message:', fullMessage);
             onSuccess(fullMessage);
+            // eslint-disable-next-line no-loop-func
             setMessagesMap(prev => ({
               ...prev,
               [activeKey]: prev[activeKey].map(msg =>
                 msg.id === newKey ? { ...msg, typing: false, content: fullMessage } : msg
               ),
             }));
-            setConversationsItems(prev => {
-              let item = prev.find(conver => conver.key === activeKey);
-              if (item && item.init) {
-                item.init = false;
-                item.label = fullMessage.substring(0, 20);
+            /* 更新会话标题 */
+            setConversationsItems(
+              // eslint-disable-next-line no-loop-func
+              prev => {
+                let item = prev.find(conver => conver.key === activeKey)
+                console.log('setConversationsItems:', item)
+                if (item && item.init) {
+                  item.init = false
+                  item.label = fullMessage.substring(0, 20) // 使用 substring 截取前20个字符
+                }
+                return prev
               }
-              return prev;
-            });
+            );
+            done = true;
             return;
           }
         }
@@ -116,187 +118,75 @@ const Independent = () => {
     }
   });
 
-  const { onRequest, messages, setMessages } = useXChat({
+  /* useXChat用于管理聊天界面中的消息显示和交互逻辑，它依赖于之前创建的agent来进行实际的消息请求。 */
+  const { onRequest, } = useXChat({
     agent,
     onSuccess: (response) => {
       console.log('useXChat:onSuccess', response);
     },
   });
 
-  useEffect(() => {
-    console.log('useEffect activeKey changed:', activeKey);
-  }, [activeKey]);
-
-  useEffect(() => {
-    console.log('useEffect messagesMap  changed:', messagesMap);
-  }, [messagesMap]);
-
-  const items = (messagesMap[activeKey] || []).map(({ id, loading, content, status, role }) => ({
-    key: id,
-    loading: loading,
-    role: role,
-    content: content,
-  }));
-
   const onSubmit = (nextContent) => {
     if (!nextContent) return;
-
-    console.log('Submitting message:', nextContent);
-
-    const newKey = Date.now();
+    console.log('Submitting message:', nextContent); // Log message submission
     onRequest(nextContent);
-    setMessagesMap(prev => {
-      const newMessages = [
-        ...(prev[activeKey] || []),
-        { id: newKey, content: nextContent, role: 'local', },
-      ];
-      return {
-        ...prev,
-        [activeKey]: newMessages,
-      };
-    });
-    setContent('');
-  };
-
-  const onPromptsItemClick = (info) => {
-    console.log('Prompt item clicked:', info);
-    onRequest(info.data.description);
+    setMessagesMap(prev => addMessageToMap(prev, activeKey, { id: Date.now(), content: nextContent, role: 'local' }));
+    // 延迟清空 content，确保 setMessagesMap 执行后
+    setTimeout(() => setContent(''), 0);
   };
 
   const onAddConversation = () => {
-    console.log('新增对话 Adding new conversation');
-    setConversationsItems([
-      ...conversationsItems,
-      {
-        init:true,
-        key: `${conversationsItems.length}`,
-        label: `New Conversation ${conversationsItems.length}`,
-      },
-    ]);
-    setActiveKey(`${conversationsItems.length}`);
+    const newKey = `${conversationsItems.length}`;
+    setConversationsItems([...conversationsItems, { key: newKey, init: true, label: `New Conversation ${conversationsItems.length}` }]);
+    setActiveKey(newKey);
   };
 
   const onConversationClick = (key) => {
-    console.log('切换对话 Conversation clicked:', key);
     setActiveKey(key);
-
     if (!messagesMap[key]) {
-      setMessagesMap((prev) => ({
-        ...prev,
-        [key]: [],
-      }));
+      setMessagesMap(prev => ({ ...prev, [key]: [] }));
     }
   };
 
+  const onPromptsItemClick = (info) => {
+    onSubmit(info.data.description);
+  };
+
   const handleFileChange = (info) => {
-    console.log('File changed:', info);
     setAttachedFiles(info.fileList);
   };
 
-  const placeholderNode = (
-    <Space direction='vertical' size={16} className={styles.placeholder}>
-      <Welcome
-        variant='borderless'
-        icon='https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp'
-        title="Hello, I'm AntX-O"
-        description='Base on Ant Design, AGI product interface solution, create a better intelligent vision~'
-        extra={
-          <Space>
-            <Button icon={<ShareAltOutlined />} />
-            <Button icon={<EllipsisOutlined />} />
-          </Space>
-        }
-      />
-      <Prompts
-        title='Do you want?'
-        items={placeholderPromptsItems}
-        styles={{
-          list: {
-            width: '100%',
-          },
-          item: {
-            flex: 1,
-          },
-        }}
-        onItemClick={onPromptsItemClick}
-      />
-    </Space>
-  );
 
-  const attachmentsNode = (
-    <Badge dot={attachedFiles.length > 0 && !headerOpen}>
-      <Button type='text' icon={<PaperClipOutlined />} onClick={() => setHeaderOpen(!headerOpen)} />
-    </Badge>
-  );
+  const items = (messagesMap[activeKey] || []).map(({ id, loading, content, role }) => ({
+    key: id,
+    loading,
+    role,
+    content,
+  }));
 
-  const senderHeader = (
-    <Sender.Header
-      title='Attachments'
-      open={headerOpen}
-      onOpenChange={setHeaderOpen}
-      styles={{
-        content: {
-          padding: 0,
-        },
-      }}
-    >
-      <Attachments
-        beforeUpload={() => false}
-        items={attachedFiles}
-        onChange={handleFileChange}
-        placeholder={type =>
-          type === 'drop'
-            ? { title: 'Drop file here' }
-            : {
-              icon: <CloudUploadOutlined />,
-              title: 'Upload files',
-              description: 'Click or drag files to this area to upload',
-            }
-        }
-      />
-    </Sender.Header>
-  );
-
-  const logoNode = (
-    <div className={styles.logo}>
-      <img
-        src='https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original'
-        draggable={false}
-        alt='logo'
-      />
-      <span>AntX-O</span>
-    </div>
-  );
 
   return (
     <div className={styles.layout}>
-      <div className={styles.menu}>
-        {logoNode}
-        <Button onClick={onAddConversation} type='link' className={styles.addBtn} icon={<PlusOutlined />}>
-          New Conversation
-        </Button>
-        <Conversations
-          items={conversationsItems}
-          className={styles.conversations}
-          activeKey={activeKey}
-          onActiveChange={onConversationClick}
-        />
-      </div>
+      <ConversationMenu
+        conversationsItems={conversationsItems}
+        activeKey={activeKey}
+        onAddConversation={onAddConversation}
+        onConversationClick={onConversationClick}
+        styles={styles}
+      />
       <div className={styles.chat}>
-        <Bubble.List
-          items={items.length > 0 ? items : [{ content: placeholderNode, variant: 'borderless' }]}
-          roles={roles}
-          className={styles.messages}
-        />
-        <Prompts items={senderPromptsItems} onItemClick={onPromptsItemClick} className={styles.Prompts} />
-        <Sender
+        <ChatBubbleList items={items} roles={roles} styles={styles} />
+        <PromptList items={senderPromptsItems} onItemClick={onPromptsItemClick} styles={styles} />
+        <MySender
+          attachedFiles={attachedFiles}
+          handleFileChange={handleFileChange}
           value={content}
-          header={senderHeader}
           onSubmit={onSubmit}
+          agent={agent}
+          headerOpen={headerOpen}
+          setHeaderOpen={setHeaderOpen}
           onChange={setContent}
-          prefix={attachmentsNode}
-          loading={agent.isRequesting()}
-          className={styles.sender}
+          styles={styles}
         />
       </div>
     </div>

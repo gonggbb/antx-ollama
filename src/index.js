@@ -2,17 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import Independent from './Independent';
-import Independent_v1 from './Independent_v1';
+// import Independent from './Independent';
 import reportWebVitals from './reportWebVitals';
 import { XProvider } from '@ant-design/x';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <XProvider theme={{ token: { colorPrimary: '#00b96b' } }}>
     <React.StrictMode>
-      {/* <App /> */}
+      <App />
       {/* <Independent /> */}
-      <Independent_v1 />
     </React.StrictMode>
   </XProvider>
 
