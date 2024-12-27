@@ -86,21 +86,34 @@ https://www.npmjs.com/package/ollama
 https://juejin.cn/post/7381478389468872741
 
 
-# setMessagesMap 
+# 注意点 
 
-messagesMap不是同步,打印会没有数据 需要useEffect 有点不合理
+messagesMap不是同步,打印会没有数据 需要useEffect 有点不合理 
 
-# ollama 3.1太大 codespaces资源有限切换3.2
+App.js  未拆分  
+Independent.js 拆分的  
+
+# codespaces 的使用
+
+https://docs.github.com/zh/enterprise-cloud@latest/codespaces
+
+https://juejin.cn/post/7102620860720087053
+
+# ollama 3.1 太大, codespaces资源有限切换3.2
 
 https://redesigned-adventure-6746p57pwxc4467-3000.app.github.dev/ 
 
+# 构建镜像
 
-同一个容器里面可以访问但是： 通的
+
+- 同一个容器里面可以访问但是： 通的
+```
 curl http://localhost:11434/api/chat -d '{
   "model": "llama3.2",
   "messages": [
     { "role": "user", "content": "why is the sky blue?" }
   ]
 }'
+```
  
- 但是浏览访问: 出现 ERR_CONNECTION_REFUSED 
+- 但是浏览访问: 出现 ERR_CONNECTION_REFUSED 
