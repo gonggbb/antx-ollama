@@ -43,7 +43,7 @@ const Independent = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             messages: [{ role: 'user', content: message }],
-            model: 'llama3.1',
+            model: 'llama3.2',
           }),
         });
 
