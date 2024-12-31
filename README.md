@@ -108,6 +108,9 @@ https://redesigned-adventure-6746p57pwxc4467-3000.app.github.dev/
 
 - 同一个容器里面可以访问但是： 通的
 ```
+ollama
+curl http://ollama:11434/api/chat
+
 curl http://localhost:11434/api/chat -d '{
   "model": "llama3.2",
   "messages": [
