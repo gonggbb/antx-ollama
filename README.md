@@ -85,16 +85,12 @@ ollama 3.1
 https://www.npmjs.com/package/ollama
 https://juejin.cn/post/7381478389468872741
 
-# codespaces 的使用
+## 🎉 codespaces 使用
 
-https://docs.github.com/zh/enterprise-cloud@latest/codespaces 
-https://juejin.cn/post/7102620860720087053 
+https://docs.github.com/zh/enterprise-cloud@latest/codespaces  
+https://juejin.cn/post/7102620860720087053  
 
-# ollama 3.1 太大, codespaces资源有限切换3.2
-
-https://redesigned-adventure-6746p57pwxc4467-3000.app.github.dev/ 
-
-# 构建镜像 
+## 🎉 构建镜像 
 
 docker-compose up --build 
 
@@ -108,16 +104,19 @@ root@77c497b4fb17:/app# curl http://ollama:11434/v1/models
 root@77c497b4fb17:/app#
 
 ```
+## ollama 3.1 太大, codespaces资源有限切换3.2
 
-# 存在的问题 
+https://redesigned-adventure-6746p57pwxc4467-3000.app.github.dev/ 
 
-## 组件 App.js  未拆分  
+##  存在的问题 
+
+### 组件 App.js  未拆分  
  messagesMap不是同步,打印会没有数据, 需要useEffect 有点不合理 
  
-## 组件 Independent.js 拆分的  
+### 组件 Independent.js 拆分的  
  切换 messagesMap 清空无效
 
-## dokcer antx-o
+### dokcer antx-o
  (blocked:mixed-content)
  
 
