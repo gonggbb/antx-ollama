@@ -1,0 +1,8 @@
+# 使用 Ollama 官方镜像作为基础镜像
+FROM ollama/ollama:latest
+
+# 暴露服务端口（假设 Ollama 服务使用 11434 端口）
+EXPOSE 11434
+
+# 设置容器启动时执行的命令
+CMD ["serve"]

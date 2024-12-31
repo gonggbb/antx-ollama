@@ -1,0 +1,31 @@
+# version: '3.9'
+
+services:
+  anto-x:
+    build:
+      context: .
+      dockerfile: Dockerfile.anto-x
+    ports:
+      - "3000:3000" # 外部访问 anto-x 服务
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - ollama # 确保 ollama 服务先启动
+    networks:
+      - app-network
+
+  ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+    ports:
+      - "11434:11434" # 外部访问 Ollama 服务
+    # environment:
+    #   OLLAMA_CACHE_DIR: "/usr/local/ollama/cache"
+    #   OLLAMA_MODELS_DIR: "/usr/local/ollama/models"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

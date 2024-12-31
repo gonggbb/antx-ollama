@@ -1,0 +1,16 @@
+# 基于 Node.js 20 镜像
+FROM node:20
+WORKDIR /app
+
+# 安装依赖
+COPY package*.json ./
+RUN npm ci --production && npm cache clean --force
+
+# 复制项目代码
+COPY . .
+
+# 暴露服务端口
+EXPOSE 3000
+
+# 启动服务
+CMD ["npm", "start"]
